@@ -17,17 +17,20 @@ if st.button("Generate Content"):
     if topic:
         with st.spinner("Searching and generating content..."):
             try:
-                # Step 2: Automated Research via Wikipedia API
-                wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic.replace(' ', '_')}"
+                # Step 2: Automated Research via Wikipedia API (More Reliable Endpoint)
+                wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic.title().replace(' ', '_')}"
                 response = requests.get(wiki_url)
                 
                 if response.status_code == 200:
                     data = response.json()
-                    raw_text = data.get("extract", "No summary found.")
-                    # Limiting text for social media post
-                    content_text = " ".join(raw_text.split()[:40]) + "..."
+                    raw_text = data.get("extract", "")
+                    if raw_text:
+                        content_text = " ".join(raw_text.split()[:40]) + "..."
+                    else:
+                        content_text = f"Discover amazing facts about {topic}! This specialized overview brings you the core concepts, history, and development of {topic} in a concise summary perfect for sharing."
                 else:
-                    content_text = f"Fascinating insights about {topic}! This automated tool helps creators quickly generate facts, tips, and summaries for social media updates."
+                    # Dynamic backup text if Wikipedia page doesn't exist
+                    content_text = f"Exploring the world of {topic}! In this digital age, {topic} has gained immense significance. Understanding its fundamentals helps content creators and enthusiasts stay ahead with key facts, trends, and valuable insights."
 
                 st.subheader("📝 Generated Content Summary")
                 st.write(content_text)
