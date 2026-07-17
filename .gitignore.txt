@@ -1,0 +1,3 @@
+voiceover.mp3
+post_graphic.png
+__pycache__/
