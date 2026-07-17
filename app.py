@@ -35,8 +35,8 @@ if st.button("Generate Content"):
                     else:
                         content_text = f"Discover amazing facts about {topic}! This specialized overview brings you the core concepts, history, and development of {topic} in a concise summary perfect for sharing."
                 else:
-                    # Dynamic backup text if Wikipedia page doesn't exist
-                    content_text = f"Exploring the world of {topic}! In this digital age, {topic} has gained immense significance. Understanding its fundamentals helps content creators and enthusiasts stay ahead with key facts, trends, and valuable insights."
+                    # Generic and natural backup text that fits ANY topic perfectly
+                    content_text = f"Let's dive into the fascinating world of {topic}! It plays an incredibly vital role in our lives, shaping how we understand the world around us. Exploring its core concepts, history, and unique features opens up fresh perspectives, inspiring content creators and enthusiasts alike to look deeper into its amazing impact."
 
                 st.subheader("📝 Generated Content Summary")
                 st.write(content_text)
