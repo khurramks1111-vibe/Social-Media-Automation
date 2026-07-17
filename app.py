@@ -21,7 +21,7 @@ if st.button("Generate Content"):
                 wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic.replace(' ', '_')}"
                 response = requests.get(wiki_url)
                 
-                if response.status_bar_code == 200:
+                if response.status_code == 200:
                     data = response.json()
                     raw_text = data.get("extract", "No summary found.")
                     # Limiting text for social media post
