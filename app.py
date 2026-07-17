@@ -17,9 +17,15 @@ if st.button("Generate Content"):
     if topic:
         with st.spinner("Searching and generating content..."):
             try:
-                # Step 2: Automated Research via Wikipedia API (More Reliable Endpoint)
+                # Step 2: Automated Research via Wikipedia API (With Headers)
                 wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic.title().replace(' ', '_')}"
-                response = requests.get(wiki_url)
+                
+                # Browser header taake Wikipedia requests block na kare
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+                
+                response = requests.get(wiki_url, headers=headers)
                 
                 if response.status_code == 200:
                     data = response.json()
