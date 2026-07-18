@@ -53,7 +53,7 @@ if st.button("Generate Pro Content"):
                     content_text = final_text
                 else:
                     # Clear error layout if web data couldn't be indexed properly
-                    st.error(f"⚠️ Internet databases par '{topic}' ke mutaliq koi authentic summary nahi mili. KKindly try a more standard phrase.")
+                    st.error(f"⚠️ Internet databases par '{topic}' cant find authentic summary. KKindly try a more standard phrase.")
                     st.stop()
 
                 # Single clean output display
