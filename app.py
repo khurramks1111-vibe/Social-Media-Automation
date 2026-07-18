@@ -2,57 +2,61 @@ import streamlit as st
 from gtts import gTTS
 from PIL import Image, ImageDraw, ImageFont
 import requests
-import os
 import random
 
-# Page Configuration
+def get_real_wikipedia_summary(search_topic):
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        
+        # Step 1: Search Wikipedia for articles matching this topic query
+        search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={search_topic}&format=json"
+        search_response = requests.get(search_url, headers=headers)
+        
+        if search_response.status_code == 200:
+            search_data = search_response.json()
+            search_results = search_data.get("query", {}).get("search", [])
+            
+            if search_results:
+                # Top result ka real title uthain (e.g., "Co-education" or "Mixed-sex education")
+                best_title = search_results[0]['title']
+                
+                # Step 2: Extract the actual summary of that specific article
+                summary_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{best_title.replace(' ', '_')}"
+                summary_response = requests.get(summary_url, headers=headers)
+                
+                if summary_response.status_code == 200:
+                    raw_extract = summary_response.json().get("extract", "")
+                    if raw_extract and len(raw_extract.strip()) > 20:
+                        words = raw_extract.split()
+                        return " ".join(words[:110]) + "...", "OK"
+
+        return None, "NO_RESULTS"
+    except Exception as e:
+        return None, f"ERROR_{str(e)}"
+
+# --- Main App ---
 st.set_page_config(page_title="Pro AI Content Tool", page_icon="🤖", layout="centered")
 
 st.title("🤖 Pro Social Media Content Creator")
-st.write("Generate a professional social media graphic and voiceover automatically!")
+st.write("Generate a professional social media graphic and voiceover with 100% Real Web Articles!")
 
-# Step 1: User Input
-topic = st.text_input("Enter a topic for research (e.g., 'Gender equality', 'Artificial intelligence', 'Coffee'):", "")
+topic = st.text_input("Enter any topic (e.g., 'Co education', 'Artificial intelligence', 'Healthy food'):", "")
 
-if st.button("Generate Content"):
+if st.button("Generate Pro Content"):
     if topic:
-        with st.spinner(f"Searching and generating unique content for '{topic}'..."):
+        with st.spinner(f"Searching internet databases for real-time summary of '{topic}'..."):
             try:
-                # Advanced Wikipedia Search Logic (Bypasses Google 403 Errors perfectly)
-                content_text = ""
+                final_text, status = get_real_wikipedia_summary(topic)
                 
-                # 1. Try direct summary first
-                formatted_topic = topic.title().replace(' ', '_')
-                wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{formatted_topic}"
-                headers = {'User-Agent': 'Mozilla/5.0'}
-                response = requests.get(wiki_url, headers=headers)
-                
-                if response.status_code == 200:
-                    raw_text = response.json().get("extract", "")
-                    if raw_text:
-                        content_text = " ".join(raw_text.split()[:110]) + "..."
-                
-                # 2. If direct search fails, use Wikipedia Search API to find the closest match
-                if not content_text:
-                    search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={topic}&format=json"
-                    search_response = requests.get(search_url, headers=headers)
-                    if search_response.status_code == 200:
-                        search_results = search_response.json().get("query", {}).get("search", [])
-                        if search_results:
-                            # Get the title of the top search result
-                            best_match_title = search_results[0]['title'].replace(' ', '_')
-                            fallback_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{best_match_title}"
-                            fallback_res = requests.get(fallback_url, headers=headers)
-                            if fallback_res.status_code == 200:
-                                raw_text = fallback_res.json().get("extract", "")
-                                if raw_text:
-                                    content_text = " ".join(raw_text.split()[:110]) + "..."
+                # Check status and allocate text
+                if status == "OK" and final_text:
+                    content_text = final_text
+                else:
+                    # Clear error layout if web data couldn't be indexed properly
+                    st.error(f"⚠️ Internet databases par '{topic}' ke mutaliq koi authentic summary nahi mili. KKindly try a more standard phrase.")
+                    st.stop()
 
-                # 3. Ultimate smart backup if absolutely nothing is found on Wikipedia
-                if not content_text:
-                    content_text = f"Let's explore the essential concepts behind {topic}. It represents a unique subject within modern discussions, heavily influencing contemporary ideas, research, and cultural frameworks. Understanding its foundation allows creators, innovators, and professionals to gain distinct insights into its practical impact and future potential."
-
-                # --- SINGLE CLEAN OUTPUT AREA ---
+                # Single clean output display
                 st.subheader("📝 Generated Content Summary")
                 st.write(content_text)
 
@@ -68,12 +72,10 @@ if st.button("Generate Content"):
                 image_path = "post_graphic.png"
                 W, H = (800, 800)
 
-                # Base Styling
                 base_color = (20, 25, 45)
                 img = Image.new('RGB', (W, H), color=base_color)
                 draw = ImageDraw.Draw(img)
 
-                # AI Pattern
                 pattern_color = (40, 45, 75)
                 for _ in range(30):
                     x = random.randint(0, W)
@@ -81,24 +83,20 @@ if st.button("Generate Content"):
                     size = random.randint(2, 6)
                     draw.ellipse([x, y, x+size, y+size], fill=pattern_color)
 
-                # Header & Footer Lines
                 line_color = (100, 100, 130)
-                header_text = f"AI CONTENT | {topic.upper()}"
+                header_text = f"REAL CONTENT | {topic.upper()}"
                 draw.text((50, 40), header_text, fill=(255, 255, 255), font_size=20)
                 draw.line([(50, 75), (W-50, 75)], fill=line_color, width=1)
                 draw.line([(50, H-75), (W-50, H-75)], fill=line_color, width=1)
                 footer_text = "AUTOMATED TOOL"
                 draw.text((W-180, H-60), footer_text, fill=(200, 200, 220), font_size=16)
 
-                # Title
                 draw.text((50, 100), f"DID YOU KNOW?", fill=(255, 215, 0), font_size=40)
 
-                # Text Container Overlay
                 overlay_color = (25, 30, 55)
                 text_box_pos = (50, 180, W-50, 700)
                 draw.rectangle(text_box_pos, fill=overlay_color)
 
-                # Text Wrap Settings
                 words = content_text.split()
                 lines = []
                 current_line = ""
